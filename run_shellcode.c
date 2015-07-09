@@ -114,7 +114,7 @@ int main(int argc, char ** argv) {
                         while (again) {
                             /* Remap every time so that caches are sure to be flushed */
                             shellcode = mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-                            if ((val = read(client, shellcode, 4096)) > 0) {
+                            if (read(client, shellcode, 4096) > 0) {
                                 val = shellcode();
                                 write(client, &val, sizeof(val));
                             } else {
@@ -137,6 +137,14 @@ int main(int argc, char ** argv) {
         }
     } else {
         /* No arguments, read from stdin (for xinetd) */
+        shellcode = mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+        if (read(0, ((char*)shellcode) + val, 4096 - val) > 0) {
+            val = shellcode();
+            write(1, &val, sizeof(val));
+        }
+
+        munmap(shellcode, 4096);
     }
     return 0;
 }
