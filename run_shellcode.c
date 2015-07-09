@@ -72,7 +72,7 @@ int main(int argc, char ** argv) {
     pid_t pid;
     size_t len;
     struct stat st;
-    int again, i, server, client, val, fd, r, total = 0, ip_version = 4;
+    int again, i, server, client, val, fd, r, ip_version = 4;
     struct timeval timeout = {1, 0};
     unsigned short port;
     int (*shellcode)();
@@ -113,23 +113,15 @@ int main(int argc, char ** argv) {
 #endif
                         while (again) {
                             /* Remap every time so that caches are sure to be flushed */
-                            shellcode = mmap(NULL, 4096 * 8, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-                            if ((val = read(client, shellcode + total, 4096 * 8 - total)) > 0) {
-                                /*printf("Read %d bytes\n", val);
-                                for (i = 0; i < val; i++) {
-                                    if (i % 16 == 0) {
-                                        printf("\n");
-                                    }
-                                    printf("%02x ", ((char*)shellcode)[i] & 0xff);
-                                }
-                                printf("\n");*/
+                            shellcode = mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                            if ((val = read(client, shellcode, 4096)) > 0) {
                                 val = shellcode();
                                 write(client, &val, sizeof(val));
                             } else {
                                 again = 0;
                             }
 
-                            munmap(shellcode, 4096 * 8);
+                            munmap(shellcode, 4096);
                         }
                         close(client);
 #if defined(FORK_SERVER)
@@ -143,6 +135,8 @@ int main(int argc, char ** argv) {
             fprintf(stderr, "%s is not a readable file and not a usable port.\n", argv[1]);
             return 1;
         }
+    } else {
+        /* No arguments, read from stdin (for xinetd) */
     }
     return 0;
 }
