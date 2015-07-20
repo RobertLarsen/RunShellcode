@@ -96,6 +96,9 @@ int main(int argc, char ** argv) {
                 fprintf(stderr, "Bad IP version.\n");
                 _exit(-1);
             }
+#if defined(DAEMONIZE)
+            daemon(0, 0);
+#endif
             /* We have a port */
             signal(SIGCHLD, child_died);
 
