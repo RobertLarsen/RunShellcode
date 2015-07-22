@@ -142,7 +142,7 @@ int main(int argc, char ** argv) {
         /* No arguments, read from stdin (for xinetd) */
         shellcode = mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-        if (read(0, ((char*)shellcode) + val, 4096 - val) > 0) {
+        if (read(0, ((char*)shellcode), 4096) > 0) {
             val = shellcode();
             write(1, &val, sizeof(val));
         }
