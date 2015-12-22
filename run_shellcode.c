@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 static int create_server(unsigned short port, int ip_version) {
@@ -112,8 +114,8 @@ int main(int argc, char ** argv) {
                     } else {
                         /* Child */
                         close(server);
-                        again = 1;
 #endif
+                        again = 1;
                         while (again) {
                             /* Remap every time so that caches are sure to be flushed */
                             shellcode = mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
