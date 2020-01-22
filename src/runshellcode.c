@@ -11,10 +11,10 @@
 #include <getopt.h>
 #include <errno.h>
 
-char *chroot_path = NULL;
-int do_fork = 0, uid = -1, gid = -1;
-enum { Undecided, IPv4, IPv6 } ip_version = Undecided;
-void (*shellcode)() = NULL;
+static char *chroot_path = NULL;
+static int do_fork = 0, uid = -1, gid = -1;
+static enum { Undecided, IPv4, IPv6 } ip_version = Undecided;
+static void (*shellcode)() = NULL;
 
 static void child_died(int sig) {
     wait(&sig);
@@ -76,7 +76,7 @@ static int create_server(unsigned short port) {
     return server;
 }
 
-void execute_shellcode() {
+static void execute_shellcode() {
     if (chroot_path && chroot(chroot_path)) {
         exit(-1);
     }
