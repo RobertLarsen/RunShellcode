@@ -93,7 +93,7 @@ static void execute_shellcode() {
     exit(0);
 }
 
-int main(int argc __attribute__((unused)), char ** argv __attribute__((unused))) {
+int main(int argc, char ** argv) {
     struct stat st;
     int server, client, fd, c, opt_idx = 0, port;
     pid_t pid;
