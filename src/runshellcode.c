@@ -93,6 +93,27 @@ static void execute_shellcode() {
     exit(0);
 }
 
+void help(char *path) {
+    printf( "Usage: %s <arguments> ([file]|[tcp port])\n"
+            "   Shellcode can be passed either as standard in, on a tcp port\n"
+            "   or as a file.\n"
+            "   If the last argument exists as a file, it will be read and\n"
+            "   executed. If the last argument is a number, a tcp server will\n"
+            "   listen on that port and read up to 4096 bytes in ONE read and\n"
+            "   then execute that. If neither option is specified, shellcode\n"
+            "   will be read from standard in and then executed\n"
+            "   \n"
+            "   Available options:\n"
+            "   --ipv4           Use IPv4 for the tcp server.\n"
+            "   --ipv6           Use IPv6 for the tcp server.\n"
+            "   --fork           Fork the tcp server for each client.\n"
+            "   --chroot <path>  Change root path before executing shellcode.\n"
+            "                    This option requires root.\n"
+            "   --uid <uid>      Change user id to this before executing shellcode.\n"
+            "   --gid <gid>      Change group id to this before executing shellcode.\n"
+            "   --help           Show this help.\n", path);
+}
+
 int main(int argc, char ** argv) {
     struct stat st;
     int server, client, fd, c, opt_idx = 0, port;
@@ -105,6 +126,7 @@ int main(int argc, char ** argv) {
         { "chroot",   required_argument, 0, 'c' },
         { "uid",      required_argument, 0, 'u' },
         { "gid",      required_argument, 0, 'g' },
+        { "help",           no_argument, 0, 'h' },
         {          0,                 0, 0,  0  }
     };
 
@@ -138,6 +160,10 @@ int main(int argc, char ** argv) {
                 break;
             case 'g':
                 gid = atoi(optarg);
+                break;
+            case 'h':
+                help(argv[0]);
+                exit(0);
                 break;
             case '?':
                 printf("Unknown: %s\n", optarg);
