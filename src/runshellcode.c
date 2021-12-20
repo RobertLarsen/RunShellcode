@@ -13,6 +13,7 @@
 
 static char *chroot_path = NULL;
 static int do_fork = 0, uid = -1, gid = -1;
+static unsigned int timeout = 0;
 static enum { Undecided, IPv4, IPv6 } ip_version = Undecided;
 static void (*shellcode)() = NULL;
 
@@ -89,6 +90,10 @@ static void execute_shellcode() {
         exit(-1);
     }
 
+    if (timeout > 0) {
+        alarm(timeout);
+    }
+
     shellcode();
     exit(0);
 }
@@ -114,6 +119,10 @@ void help(char *path) {
             "   --help           Show this help.\n", path);
 }
 
+void handle_alarm(int sig) {
+    exit(0);
+}
+
 int main(int argc, char ** argv) {
     struct stat st;
     int server, client, fd, c, opt_idx = 0, port;
@@ -126,6 +135,7 @@ int main(int argc, char ** argv) {
         { "chroot",   required_argument, 0, 'c' },
         { "uid",      required_argument, 0, 'u' },
         { "gid",      required_argument, 0, 'g' },
+        { "timeout",  required_argument, 0, 't' },
         { "help",           no_argument, 0, 'h' },
         {          0,                 0, 0,  0  }
     };
@@ -165,6 +175,9 @@ int main(int argc, char ** argv) {
                 help(argv[0]);
                 exit(0);
                 break;
+            case 't':
+                timeout = strtoul(optarg, NULL, 10);
+                break;
             case '?':
                 printf("Unknown: %s\n", optarg);
                 break;
@@ -172,6 +185,7 @@ int main(int argc, char ** argv) {
     }
 
     signal(SIGCHLD, child_died);
+    signal(SIGALRM, handle_alarm);
 
     if (optind == argc) {
         /* Read shellcode from stdin */
