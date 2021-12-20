@@ -109,14 +109,15 @@ void help(char *path) {
             "   will be read from standard in and then executed\n"
             "   \n"
             "   Available options:\n"
-            "   --ipv4           Use IPv4 for the tcp server.\n"
-            "   --ipv6           Use IPv6 for the tcp server.\n"
-            "   --fork           Fork the tcp server for each client.\n"
-            "   --chroot <path>  Change root path before executing shellcode.\n"
-            "                    This option requires root.\n"
-            "   --uid <uid>      Change user id to this before executing shellcode.\n"
-            "   --gid <gid>      Change group id to this before executing shellcode.\n"
-            "   --help           Show this help.\n", path);
+            "   --ipv4              Use IPv4 for the tcp server.\n"
+            "   --ipv6              Use IPv6 for the tcp server.\n"
+            "   --fork              Fork the tcp server for each client.\n"
+            "   --chroot <path>     Change root path before executing shellcode.\n"
+            "                       This option requires root.\n"
+            "   --uid <uid>         Change user id to this before executing shellcode.\n"
+            "   --gid <gid>         Change group id to this before executing shellcode.\n"
+            "   --timeout <seconds> Exit <seconds> after starting the shellcode.\n"
+            "   --help              Show this help.\n", path);
 }
 
 void handle_alarm(int sig) {
@@ -140,7 +141,7 @@ int main(int argc, char ** argv) {
         {          0,                 0, 0,  0  }
     };
 
-    while ((c = getopt_long(argc, argv, "46c:u:", long_options, &opt_idx)) != -1) {
+    while ((c = getopt_long(argc, argv, "46c:u:g:t:", long_options, &opt_idx)) != -1) {
         switch (c) {
             case '4':
             case '6':
