@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <malloc.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <netinet/in.h>
@@ -126,7 +127,7 @@ void handle_alarm(int sig) {
 
 int main(int argc, char ** argv) {
     struct stat st;
-    int server, client, fd, c, opt_idx = 0, port;
+    int server, client, fd, c, opt_idx = 0, port, capacity, bytes_read, total_read;
     pid_t pid;
 
     static struct option long_options[] = {
@@ -190,10 +191,16 @@ int main(int argc, char ** argv) {
 
     if (optind == argc) {
         /* Read shellcode from stdin */
-        shellcode = mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (read(0, shellcode, 4096) > 0) {
-            execute_shellcode();
+        total_read = 0;
+        capacity = 4096;
+        shellcode = malloc(capacity);
+        while ((bytes_read = read(0, (void*)shellcode + total_read, capacity - total_read)) > 0) {
+            total_read += bytes_read;
+            capacity *= 2;
+            shellcode = realloc(shellcode, capacity);
         }
+        mprotect((void*)((unsigned long)shellcode & ~4095), total_read + ((unsigned long)shellcode & 4095), PROT_READ|PROT_WRITE|PROT_EXEC);
+        execute_shellcode();
     } else if (stat(argv[optind], &st) == 0) {
         /* Read shellcode from a file */
         if ((fd = open(argv[optind], O_RDONLY)) < 0) {
